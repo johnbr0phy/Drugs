@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra-Crazy Drug Simulation Game</title>
+    <title>Ultra-Crazy Interactive Drug Simulation Game</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,6 +11,7 @@
             background-color: #f0f0f0;
             margin: 20px;
             transition: background-color 0.5s;
+            overflow: hidden; /* Keep the chaos contained */
         }
         h1 {
             font-size: 24px;
@@ -18,6 +19,9 @@
         }
         #effect-wrapper {
             transition: all 0.5s;
+            position: relative;
+            width: 100%;
+            height: 100%;
         }
         #game-container {
             max-width: 600px;
@@ -67,8 +71,6 @@
             font-size: 16px;
             margin-top: 10px;
         }
-
-        /* Vignette for Ketamine */
         #vignette {
             position: fixed;
             top: 0;
@@ -76,113 +78,8 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            background: radial-gradient(circle, transparent 20%, black 100%);
+            background: radial-gradient(circle, transparent 10%, black 100%);
             display: none;
-            animation: vignettePulse 0.5s infinite;
-        }
-        @keyframes vignettePulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
-        }
-
-        /* Ultra-Crazy Drug Effects */
-        .effect-acid {
-            animation: hueRotateInsane 1s infinite linear, scaleTwist 0.5s infinite;
-        }
-        @keyframes hueRotateInsane {
-            from { filter: hue-rotate(0deg) saturate(200%); }
-            to { filter: hue-rotate(360deg) saturate(200%); }
-        }
-        @keyframes scaleTwist {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.2) rotate(15deg); }
-        }
-        .effect-weed {
-            filter: blur(15px);
-            animation: waveInsane 1s infinite, sway 2s infinite;
-        }
-        @keyframes waveInsane {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(20px); }
-            75% { transform: translateX(-20px); }
-        }
-        @keyframes sway {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(10px); }
-        }
-        .effect-cocaine {
-            animation: vibrateInsane 0.02s infinite, flashInsane 0.1s infinite;
-        }
-        @keyframes vibrateInsane {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-5px) translateY(5px); }
-            40% { transform: translateX(5px) translateY(-5px); }
-            60% { transform: translateX(-5px) translateY(5px); }
-            80% { transform: translateX(5px) translateY(-5px); }
-        }
-        @keyframes flashInsane {
-            0%, 100% { filter: brightness(100%) contrast(100%); }
-            50% { filter: brightness(300%) contrast(150%); }
-        }
-        .effect-heroin {
-            filter: blur(10px) contrast(30%) opacity(0.7);
-            animation: drift 3s infinite;
-        }
-        @keyframes drift {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(10px, 10px); }
-            50% { transform: translate(-10px, -10px); }
-            75% { transform: translate(10px, -10px); }
-        }
-        .effect-shrooms {
-            animation: shroomsInsane 1s infinite;
-        }
-        @keyframes shroomsInsane {
-            0% { filter: invert(100%) hue-rotate(0deg) brightness(100%) saturate(100%); transform: scale(1); }
-            50% { filter: invert(100%) hue-rotate(180deg) brightness(200%) saturate(300%); transform: scale(1.15); }
-            100% { filter: invert(100%) hue-rotate(360deg) brightness(100%) saturate(100%); transform: scale(1); }
-        }
-        .effect-meth {
-            animation: glitchInsane 0.05s infinite;
-        }
-        @keyframes glitchInsane {
-            0% { transform: translate(0, 0) skew(0deg); filter: hue-rotate(0deg); }
-            20% { transform: translate(10px, 0) skew(10deg); filter: hue-rotate(90deg); }
-            40% { transform: translate(-10px, 5px) skew(-10deg); filter: hue-rotate(180deg); }
-            60% { transform: translate(10px, -5px) skew(10deg); filter: hue-rotate(270deg); }
-            80% { transform: translate(-10px, 0) skew(-10deg); filter: hue-rotate(360deg); }
-            100% { transform: translate(0, 0) skew(0deg); filter: hue-rotate(0deg); }
-        }
-        .effect-ketamine {
-            animation: dissociate 0.5s infinite;
-        }
-        @keyframes dissociate {
-            0%, 100% { transform: scale(0.7) rotate(0deg); }
-            50% { transform: scale(0.6) rotate(5deg); }
-        }
-        .effect-pcp {
-            animation: shakeInsane 0.1s infinite;
-        }
-        @keyframes shakeInsane {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            10% { transform: translate(-30px, 30px) rotate(10deg); }
-            20% { transform: translate(30px, -30px) rotate(-10deg); }
-            30% { transform: translate(-30px, 30px) rotate(10deg); }
-            40% { transform: translate(30px, -30px) rotate(-10deg); }
-            50% { transform: translate(0, 0) rotate(0deg); }
-            60% { transform: translate(-20px, 20px) rotate(5deg); }
-            70% { transform: translate(20px, -20px) rotate(-5deg); }
-            80% { transform: translate(-20px, 20px) rotate(5deg); }
-            90% { transform: translate(20px, -20px) rotate(-5deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
-        }
-        .effect-dmt {
-            animation: dmtInsane 0.2s infinite;
-        }
-        @keyframes dmtInsane {
-            0% { filter: hue-rotate(0deg) brightness(2) contrast(2) saturate(200%); transform: scale(1) rotate(0deg); }
-            50% { filter: hue-rotate(180deg) brightness(3) contrast(3) saturate(400%); transform: scale(1.3) rotate(20deg); }
-            100% { filter: hue-rotate(360deg) brightness(2) contrast(2) saturate(200%); transform: scale(1) rotate(0deg); }
         }
     </style>
 </head>
@@ -190,7 +87,7 @@
     <div id="vignette"></div>
     <div id="effect-wrapper">
         <div id="game-container">
-            <h1>Ultra-Crazy Drug Simulation Game</h1>
+            <h1>Ultra-Crazy Interactive Drug Simulation Game</h1>
             <div id="highness-bar">
                 <div id="highness-fill"></div>
             </div>
@@ -220,8 +117,27 @@
         let timeElapsed = 0;
         let gameOver = false;
         let intervalId = null;
+        let effectActive = false;
+        let effectStartTime = 0;
+        let currentDrug = null;
         let effectTimeout = null;
-        let ecstasyInterval = null;
+
+        // Mouse tracking
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let mouseX = 0;
+        let mouseY = 0;
+        let mouseSpeed = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            const dx = mouseX - lastMouseX;
+            const dy = mouseY - lastMouseY;
+            mouseSpeed = Math.sqrt(dx * dx + dy * dy);
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+        });
 
         // DOM elements
         const effectWrapper = document.getElementById('effect-wrapper');
@@ -288,41 +204,111 @@
             applyEffect(drug);
         }
 
-        // Apply ultra-crazy visual effect
+        // Apply ultra-crazy interactive visual effect
         function applyEffect(drug) {
-            effectWrapper.classList.remove('effect-acid', 'effect-weed', 'effect-cocaine', 'effect-heroin', 'effect-shrooms', 'effect-meth', 'effect-ketamine', 'effect-pcp', 'effect-dmt');
-            if (ecstasyInterval) {
-                clearInterval(ecstasyInterval);
-                ecstasyInterval = null;
-                effectWrapper.style.backgroundColor = '';
+            if (effectTimeout) {
+                clearTimeout(effectTimeout);
             }
-            vignette.style.display = 'none';
+            currentDrug = drug;
+            effectStartTime = Date.now();
+            if (!effectActive) {
+                effectActive = true;
+                requestAnimationFrame(updateEffect);
+            }
+            effectTimeout = setTimeout(() => {
+                effectActive = false;
+                effectWrapper.style = '';
+                vignette.style.display = 'none';
+            }, 10000);
+        }
 
-            if (drug === 'ecstasy') {
-                ecstasyInterval = setInterval(() => {
-                    const hue = Math.random() * 360;
-                    effectWrapper.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
-                    effectWrapper.style.transform = `rotate(${Math.random() * 10 - 5}deg) scale(${1 + Math.random() * 0.2})`;
-                }, 20); // Insanely fast flashing and twitching
-                setTimeout(() => {
-                    clearInterval(ecstasyInterval);
-                    ecstasyInterval = null;
-                    effectWrapper.style.backgroundColor = '';
-                    effectWrapper.style.transform = '';
-                }, 10000);
-            } else if (drug === 'ketamine') {
-                effectWrapper.classList.add(`effect-${drug}`);
-                vignette.style.display = 'block'; // Pulsing vignette
-                setTimeout(() => {
-                    effectWrapper.classList.remove(`effect-${drug}`);
-                    vignette.style.display = 'none';
-                }, 10000);
-            } else {
-                effectWrapper.classList.add(`effect-${drug}`);
-                setTimeout(() => {
-                    effectWrapper.classList.remove(`effect-${drug}`);
-                }, 10000);
+        // Update effect with mouse interaction
+        function updateEffect() {
+            if (!effectActive) return;
+            const elapsed = (Date.now() - effectStartTime) / 1000;
+            const mouseFactor = Math.min(mouseSpeed / 10, 10); // Cap mouse factor for sanity
+
+            switch (currentDrug) {
+                case 'acid':
+                    const hueAcid = (elapsed * 720 * (1 + mouseFactor)) % 360; // Double speed
+                    const scaleAcid = 1 + 0.5 * Math.sin(elapsed * Math.PI * (2 + mouseFactor)); // Larger scaling
+                    const contrastAcid = 100 + 100 * Math.sin(elapsed * 4 * Math.PI * (1 + mouseFactor));
+                    const brightnessAcid = 100 + 50 * Math.cos(elapsed * 3 * (1 + mouseFactor));
+                    effectWrapper.style.transform = `scale(${scaleAcid}) rotate(${mouseFactor * 10}deg)`;
+                    effectWrapper.style.filter = `hue-rotate(${hueAcid}deg) saturate(${300 + mouseFactor * 200}%) contrast(${contrastAcid}%) brightness(${brightnessAcid}%)`;
+                    break;
+                case 'weed':
+                    const blurWeed = 20 + mouseFactor * 10; // Up to 120px blur
+                    const greenShift = 90 + mouseFactor * 20; // Greener with movement
+                    effectWrapper.style.filter = `blur(${blurWeed}px) hue-rotate(${greenShift}deg) saturate(${200 + mouseFactor * 300}%) opacity(${0.9 - mouseFactor * 0.05})`;
+                    effectWrapper.style.transform = `scale(${1 + mouseFactor * 0.1})`;
+                    break;
+                case 'cocaine':
+                    const vibrateX = Math.sin(elapsed * 200 * (1 + mouseFactor)) * (10 + mouseFactor * 5);
+                    const vibrateY = Math.cos(elapsed * 200 * (1 + mouseFactor)) * (10 + mouseFactor * 5);
+                    const flashChance = 0.2 * (1 + mouseFactor);
+                    const flash = Math.random() < flashChance ? `invert(${100 + mouseFactor * 20}%)` : '';
+                    effectWrapper.style.transform = `translate(${vibrateX}px, ${vibrateY}px) skew(${mouseFactor * 5}deg)`;
+                    effectWrapper.style.filter = `${flash} brightness(${150 + mouseFactor * 50}%)`;
+                    break;
+                case 'heroin':
+                    const driftX = (mouseX / window.innerWidth - 0.5) * 100; // Wider drift
+                    const driftY = (mouseY / window.innerHeight - 0.5) * 100;
+                    const zoomHeroin = 1 + 0.2 * Math.sin(elapsed * 1 + mouseFactor);
+                    effectWrapper.style.transform = `translate(${driftX}px, ${driftY}px) scale(${zoomHeroin}) rotate(${mouseFactor * 15}deg)`;
+                    effectWrapper.style.filter = `blur(${15 + mouseFactor * 5}px) contrast(${40 - mouseFactor * 5}%) opacity(${0.6 - mouseFactor * 0.05})`;
+                    break;
+                case 'ecstasy':
+                    const hueEcstasy = (elapsed * 720 * (1 + mouseFactor * 20)) % 360; // Insane color speed
+                    const scaleEcstasy = 1 + 0.3 * Math.sin(elapsed * 20 * (1 + mouseFactor));
+                    const rotateEcstasy = Math.sin(elapsed * 10 * (1 + mouseFactor)) * 30;
+                    effectWrapper.style.backgroundColor = `hsl(${hueEcstasy}, 100%, ${50 + mouseFactor * 20}%)`;
+                    effectWrapper.style.transform = `scale(${scaleEcstasy}) rotate(${rotateEcstasy}deg) skew(${mouseFactor * 10}deg)`;
+                    effectWrapper.style.filter = `saturate(${400 + mouseFactor * 200}%) brightness(${100 + mouseFactor * 100}%)`;
+                    break;
+                case 'shrooms':
+                    const invertShrooms = Math.sin(elapsed * 4 * Math.PI * (1 + mouseFactor)) * 75 + 75; // Wilder inversion
+                    const hueShrooms = (elapsed * 720 * (1 + mouseFactor * 2)) % 360;
+                    const brightnessShrooms = 100 + 200 * Math.sin(elapsed * 2 * Math.PI * (1 + mouseFactor));
+                    const saturateShrooms = 200 + 400 * mouseFactor;
+                    effectWrapper.style.transform = `scale(${1 + mouseFactor * 0.2}) rotate(${mouseFactor * 20}deg)`;
+                    effectWrapper.style.filter = `invert(${invertShrooms}%) hue-rotate(${hueShrooms}deg) brightness(${brightnessShrooms}%) saturate(${saturateShrooms}%)`;
+                    break;
+                case 'meth':
+                    const glitchX = Math.sin(elapsed * 100 * (1 + mouseFactor)) * (20 + mouseFactor * 10);
+                    const glitchY = Math.cos(elapsed * 100 * (1 + mouseFactor)) * (20 + mouseFactor * 10);
+                    const skewMeth = Math.sin(elapsed * 20 * (1 + mouseFactor)) * 40;
+                    const hueMeth = (elapsed * 720 * (1 + mouseFactor * 5)) % 360;
+                    effectWrapper.style.transform = `translate(${glitchX}px, ${glitchY}px) skew(${skewMeth}deg) scale(${1 + mouseFactor * 0.15})`;
+                    effectWrapper.style.filter = `hue-rotate(${hueMeth}deg) contrast(${150 + mouseFactor * 50}%)`;
+                    break;
+                case 'ketamine':
+                    const scaleKet = 0.5 - 0.2 * (mouseY / window.innerHeight); // More extreme scaling
+                    const rotateKet = (mouseX / window.innerWidth - 0.5) * 40;
+                    const blurKet = 10 + mouseFactor * 10;
+                    effectWrapper.style.transform = `scale(${scaleKet}) rotate(${rotateKet}deg) translate(${(mouseX / window.innerWidth - 0.5) * 50}px, ${(mouseY / window.innerHeight - 0.5) * 50}px)`;
+                    effectWrapper.style.filter = `blur(${blurKet}px)`;
+                    vignette.style.display = 'block';
+                    vignette.style.opacity = 0.9 + 0.3 * Math.sin(elapsed * 20 * (1 + mouseFactor));
+                    break;
+                case 'pcp':
+                    const shakeX = Math.sin(elapsed * 40 * (1 + mouseFactor)) * (50 + mouseFactor * 20); // Huge shakes
+                    const shakeY = Math.cos(elapsed * 40 * (1 + mouseFactor)) * (50 + mouseFactor * 20);
+                    const rotatePcp = Math.sin(elapsed * 10 * (1 + mouseFactor)) * 45;
+                    effectWrapper.style.transform = `translate(${shakeX}px, ${shakeY}px) rotate(${rotatePcp}deg) skew(${mouseFactor * 15}deg)`;
+                    effectWrapper.style.filter = `contrast(${200 + mouseFactor * 100}%) brightness(${100 + mouseFactor * 50}%)`;
+                    break;
+                case 'dmt':
+                    const hueDmt = (elapsed * 1440 * (1 + mouseFactor * 10)) % 360; // Hyper-fast hue
+                    const scaleDmt = 1 + 0.6 * Math.sin(elapsed * 10 * (1 + mouseFactor)); // Massive scaling
+                    const twistDmt = Math.sin(elapsed * 4 * Math.PI * (1 + mouseFactor)) * 60;
+                    const brightnessDmt = 300 + 200 * mouseFactor;
+                    const contrastDmt = 300 + 200 * mouseFactor;
+                    effectWrapper.style.transform = `scale(${scaleDmt}) rotate(${twistDmt}deg) translate(${(mouseX / window.innerWidth - 0.5) * 50}px, ${(mouseY / window.innerHeight - 0.5) * 50}px)`;
+                    effectWrapper.style.filter = `hue-rotate(${hueDmt}deg) brightness(${brightnessDmt}%) contrast(${contrastDmt}%) saturate(${600 + mouseFactor * 400}%)`;
+                    break;
             }
+            requestAnimationFrame(updateEffect);
         }
 
         // Reset game
@@ -333,14 +319,11 @@
             gameOver = false;
             clearInterval(intervalId);
             intervalId = null;
-            clearTimeout(effectTimeout);
-            effectWrapper.classList.remove('effect-acid', 'effect-weed', 'effect-cocaine', 'effect-heroin', 'effect-shrooms', 'effect-meth', 'effect-ketamine', 'effect-pcp', 'effect-dmt');
-            if (ecstasyInterval) {
-                clearInterval(ecstasyInterval);
-                ecstasyInterval = null;
-                effectWrapper.style.backgroundColor = '';
-                effectWrapper.style.transform = '';
+            if (effectTimeout) {
+                clearTimeout(effectTimeout);
             }
+            effectActive = false;
+            effectWrapper.style = '';
             vignette.style.display = 'none';
             updateHighness();
             timeDisplay.textContent = 'Time Elapsed: 0s';
