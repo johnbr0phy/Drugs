@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drug Simulation Game</title>
+    <title>Ultra-Crazy Drug Simulation Game</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,6 +15,9 @@
         h1 {
             font-size: 24px;
             margin-bottom: 10px;
+        }
+        #effect-wrapper {
+            transition: all 0.5s;
         }
         #game-container {
             max-width: 600px;
@@ -30,20 +33,18 @@
         }
         #highness-fill {
             height: 100%;
-            width: 50%; /* Starts at 0 (-100 to 100 scale maps to 0-100%) */
+            width: 50%;
             background-color: #00ff00;
             transition: width 0.5s, background-color 0.5s;
         }
         #status {
             font-size: 18px;
             margin: 10px 0;
-            min-height: 40px;
         }
         #message {
             font-size: 16px;
             color: #333;
             margin: 10px 0;
-            min-height: 20px;
         }
         button {
             padding: 10px 20px;
@@ -66,73 +67,150 @@
             font-size: 16px;
             margin-top: 10px;
         }
-        #drug-selection {
-            margin-bottom: 20px;
+
+        /* Vignette for Ketamine */
+        #vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 20%, black 100%);
+            display: none;
+            animation: vignettePulse 0.5s infinite;
         }
-        #drug-selection button {
-            margin: 5px;
+        @keyframes vignettePulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
         }
 
-        /* Drug Effects */
-        .invert { filter: invert(100%); }
-        .grayscale { filter: grayscale(100%); }
-        .sepia { filter: sepia(100%); }
-        .blur { filter: blur(5px); }
-        .pixelate { image-rendering: pixelated; }
-        .rotate { transform: rotate(180deg); }
-        .glitch {
-            animation: glitch 0.5s infinite;
+        /* Ultra-Crazy Drug Effects */
+        .effect-acid {
+            animation: hueRotateInsane 1s infinite linear, scaleTwist 0.5s infinite;
         }
-        @keyframes glitch {
-            0% { transform: translate(0); }
-            20% { transform: translate(-5px, 5px); }
-            40% { transform: translate(5px, -5px); }
-            60% { transform: translate(-5px, 5px); }
-            80% { transform: translate(5px, -5px); }
-            100% { transform: translate(0); }
+        @keyframes hueRotateInsane {
+            from { filter: hue-rotate(0deg) saturate(200%); }
+            to { filter: hue-rotate(360deg) saturate(200%); }
         }
-        .color-shift { filter: hue-rotate(90deg); }
-        .wave {
-            animation: wave 2s infinite;
+        @keyframes scaleTwist {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(15deg); }
         }
-        @keyframes wave {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(10px); }
-            100% { transform: translateX(0); }
+        .effect-weed {
+            filter: blur(15px);
+            animation: waveInsane 1s infinite, sway 2s infinite;
         }
-        .particles {
-            background: url('https://via.placeholder.com/10') repeat;
-            animation: particles 5s infinite;
+        @keyframes waveInsane {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(20px); }
+            75% { transform: translateX(-20px); }
         }
-        @keyframes particles {
-            0% { background-position: 0 0; }
-            100% { background-position: 100px 100px; }
+        @keyframes sway {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+        .effect-cocaine {
+            animation: vibrateInsane 0.02s infinite, flashInsane 0.1s infinite;
+        }
+        @keyframes vibrateInsane {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-5px) translateY(5px); }
+            40% { transform: translateX(5px) translateY(-5px); }
+            60% { transform: translateX(-5px) translateY(5px); }
+            80% { transform: translateX(5px) translateY(-5px); }
+        }
+        @keyframes flashInsane {
+            0%, 100% { filter: brightness(100%) contrast(100%); }
+            50% { filter: brightness(300%) contrast(150%); }
+        }
+        .effect-heroin {
+            filter: blur(10px) contrast(30%) opacity(0.7);
+            animation: drift 3s infinite;
+        }
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(10px, 10px); }
+            50% { transform: translate(-10px, -10px); }
+            75% { transform: translate(10px, -10px); }
+        }
+        .effect-shrooms {
+            animation: shroomsInsane 1s infinite;
+        }
+        @keyframes shroomsInsane {
+            0% { filter: invert(100%) hue-rotate(0deg) brightness(100%) saturate(100%); transform: scale(1); }
+            50% { filter: invert(100%) hue-rotate(180deg) brightness(200%) saturate(300%); transform: scale(1.15); }
+            100% { filter: invert(100%) hue-rotate(360deg) brightness(100%) saturate(100%); transform: scale(1); }
+        }
+        .effect-meth {
+            animation: glitchInsane 0.05s infinite;
+        }
+        @keyframes glitchInsane {
+            0% { transform: translate(0, 0) skew(0deg); filter: hue-rotate(0deg); }
+            20% { transform: translate(10px, 0) skew(10deg); filter: hue-rotate(90deg); }
+            40% { transform: translate(-10px, 5px) skew(-10deg); filter: hue-rotate(180deg); }
+            60% { transform: translate(10px, -5px) skew(10deg); filter: hue-rotate(270deg); }
+            80% { transform: translate(-10px, 0) skew(-10deg); filter: hue-rotate(360deg); }
+            100% { transform: translate(0, 0) skew(0deg); filter: hue-rotate(0deg); }
+        }
+        .effect-ketamine {
+            animation: dissociate 0.5s infinite;
+        }
+        @keyframes dissociate {
+            0%, 100% { transform: scale(0.7) rotate(0deg); }
+            50% { transform: scale(0.6) rotate(5deg); }
+        }
+        .effect-pcp {
+            animation: shakeInsane 0.1s infinite;
+        }
+        @keyframes shakeInsane {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-30px, 30px) rotate(10deg); }
+            20% { transform: translate(30px, -30px) rotate(-10deg); }
+            30% { transform: translate(-30px, 30px) rotate(10deg); }
+            40% { transform: translate(30px, -30px) rotate(-10deg); }
+            50% { transform: translate(0, 0) rotate(0deg); }
+            60% { transform: translate(-20px, 20px) rotate(5deg); }
+            70% { transform: translate(20px, -20px) rotate(-5deg); }
+            80% { transform: translate(-20px, 20px) rotate(5deg); }
+            90% { transform: translate(20px, -20px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        .effect-dmt {
+            animation: dmtInsane 0.2s infinite;
+        }
+        @keyframes dmtInsane {
+            0% { filter: hue-rotate(0deg) brightness(2) contrast(2) saturate(200%); transform: scale(1) rotate(0deg); }
+            50% { filter: hue-rotate(180deg) brightness(3) contrast(3) saturate(400%); transform: scale(1.3) rotate(20deg); }
+            100% { filter: hue-rotate(360deg) brightness(2) contrast(2) saturate(200%); transform: scale(1) rotate(0deg); }
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <h1>Drug Simulation Game</h1>
-        <div id="drug-selection">
-            <button data-drug="invert">Invert Colors</button>
-            <button data-drug="grayscale">Grayscale</button>
-            <button data-drug="sepia">Sepia</button>
-            <button data-drug="blur">Blur</button>
-            <button data-drug="pixelate">Pixelate</button>
-            <button data-drug="rotate">Rotate Screen</button>
-            <button data-drug="glitch">Glitch Effect</button>
-            <button data-drug="color-shift">Color Shift</button>
-            <button data-drug="wave">Wave Distortion</button>
-            <button data-drug="particles">Floating Particles</button>
+    <div id="vignette"></div>
+    <div id="effect-wrapper">
+        <div id="game-container">
+            <h1>Ultra-Crazy Drug Simulation Game</h1>
+            <div id="highness-bar">
+                <div id="highness-fill"></div>
+            </div>
+            <div id="status">Highness: 0</div>
+            <div id="message"></div>
+            <div id="drug-buttons">
+                <button onclick="takeDrug('acid')">Acid</button>
+                <button onclick="takeDrug('weed')">Weed</button>
+                <button onclick="takeDrug('cocaine')">Cocaine</button>
+                <button onclick="takeDrug('heroin')">Heroin</button>
+                <button onclick="takeDrug('ecstasy')">Ecstasy</button>
+                <button onclick="takeDrug('shrooms')">Shrooms</button>
+                <button onclick="takeDrug('meth')">Meth</button>
+                <button onclick="takeDrug('ketamine')">Ketamine</button>
+                <button onclick="takeDrug('pcp')">PCP</button>
+                <button onclick="takeDrug('dmt')">DMT</button>
+            </div>
+            <button id="reset-btn">Reset Game</button>
+            <div id="time">Time Elapsed: 0s</div>
         </div>
-        <div id="highness-bar">
-            <div id="highness-fill"></div>
-        </div>
-        <div id="status">Highness: 0</div>
-        <div id="message"></div>
-        <button id="take-btn" disabled>Take Selected Drug</button>
-        <button id="reset-btn">Reset Game</button>
-        <div id="time">Time Elapsed: 0s</div>
     </div>
 
     <script>
@@ -142,32 +220,22 @@
         let timeElapsed = 0;
         let gameOver = false;
         let intervalId = null;
-        let selectedDrug = null;
         let effectTimeout = null;
+        let ecstasyInterval = null;
 
         // DOM elements
+        const effectWrapper = document.getElementById('effect-wrapper');
         const highnessFill = document.getElementById('highness-fill');
         const status = document.getElementById('status');
         const message = document.getElementById('message');
-        const takeBtn = document.getElementById('take-btn');
-        const resetBtn = document.getElementById('reset-btn');
         const timeDisplay = document.getElementById('time');
         const body = document.body;
-        const drugButtons = document.querySelectorAll('#drug-selection button');
-
-        // Select a drug
-        drugButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                selectedDrug = button.dataset.drug;
-                takeBtn.disabled = false;
-                message.textContent = `Selected: ${button.textContent}`;
-            });
-        });
+        const vignette = document.getElementById('vignette');
 
         // Start the game timer
         function startGame() {
             if (!intervalId) {
-                intervalId = setInterval(updateGame, 1000); // Update every second
+                intervalId = setInterval(updateGame, 1000);
             }
         }
 
@@ -175,88 +243,110 @@
         function updateGame() {
             if (gameOver) return;
 
-            // Decrease highness based on tolerance
             const decreaseRate = 2 + 0.2 * tolerance;
             highness -= decreaseRate;
             updateHighness();
 
-            // Increment time
             timeElapsed++;
             timeDisplay.textContent = `Time Elapsed: ${timeElapsed}s`;
 
-            // Check game over conditions
             if (highness > 100) {
-                endGame('Overdose: You took too much. Game Over.');
+                endGame('Overdose: Game Over');
             } else if (highness < -100) {
-                endGame('Severe Withdrawal: You can’t handle it anymore. Game Over.');
+                endGame('Severe Withdrawal: Game Over');
             }
         }
 
-        // Update highness display and effects
+        // Update highness display and background color
         function updateHighness() {
-            // Map highness (-100 to 100) to percentage (0% to 100%)
             const percentage = ((highness + 100) / 200) * 100;
             highnessFill.style.width = `${percentage}%`;
             status.textContent = `Highness: ${Math.round(highness)}`;
 
-            // Update bar color based on highness
             if (highness >= 80) {
-                highnessFill.style.backgroundColor = '#00ff00'; // Green
+                body.style.backgroundColor = '#e0ffe0';
             } else if (highness >= 50) {
-                highnessFill.style.backgroundColor = '#ffff00'; // Yellow
+                body.style.backgroundColor = '#fff5e0';
             } else if (highness >= 0) {
-                highnessFill.style.backgroundColor = '#cccccc'; // Gray
+                body.style.backgroundColor = '#f0f0f0';
             } else {
-                highnessFill.style.backgroundColor = '#ff0000'; // Red
+                body.style.backgroundColor = '#ffe0e0';
             }
         }
 
-        // Take selected drug
-        takeBtn.addEventListener('click', () => {
-            if (gameOver || !selectedDrug) return;
+        // Take drug action
+        function takeDrug(drug) {
+            if (gameOver) return;
             startGame();
 
-            // Calculate highness increase with tolerance
-            const baseIncrease = 80 + (Math.random() * 20 - 10); // 70-90
+            const baseIncrease = 80 + (Math.random() * 20 - 10);
             const increase = baseIncrease / (1 + tolerance / 10);
             highness += increase;
-            tolerance += 1; // Increase tolerance each dose
+            tolerance += 1;
             updateHighness();
 
-            // Apply drug effect
-            applyDrugEffect(selectedDrug);
-        });
+            applyEffect(drug);
+        }
 
-        // Apply visual effect for the selected drug
-        function applyDrugEffect(drug) {
-            // Remove any existing effect
-            body.classList.remove('invert', 'grayscale', 'sepia', 'blur', 'pixelate', 'rotate', 'glitch', 'color-shift', 'wave', 'particles');
+        // Apply ultra-crazy visual effect
+        function applyEffect(drug) {
+            effectWrapper.classList.remove('effect-acid', 'effect-weed', 'effect-cocaine', 'effect-heroin', 'effect-shrooms', 'effect-meth', 'effect-ketamine', 'effect-pcp', 'effect-dmt');
+            if (ecstasyInterval) {
+                clearInterval(ecstasyInterval);
+                ecstasyInterval = null;
+                effectWrapper.style.backgroundColor = '';
+            }
+            vignette.style.display = 'none';
 
-            // Add the new effect
-            body.classList.add(drug);
-
-            // Set a timeout to remove the effect after 10 seconds
-            if (effectTimeout) clearTimeout(effectTimeout);
-            effectTimeout = setTimeout(() => {
-                body.classList.remove(drug);
-            }, 10000);
+            if (drug === 'ecstasy') {
+                ecstasyInterval = setInterval(() => {
+                    const hue = Math.random() * 360;
+                    effectWrapper.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+                    effectWrapper.style.transform = `rotate(${Math.random() * 10 - 5}deg) scale(${1 + Math.random() * 0.2})`;
+                }, 20); // Insanely fast flashing and twitching
+                setTimeout(() => {
+                    clearInterval(ecstasyInterval);
+                    ecstasyInterval = null;
+                    effectWrapper.style.backgroundColor = '';
+                    effectWrapper.style.transform = '';
+                }, 10000);
+            } else if (drug === 'ketamine') {
+                effectWrapper.classList.add(`effect-${drug}`);
+                vignette.style.display = 'block'; // Pulsing vignette
+                setTimeout(() => {
+                    effectWrapper.classList.remove(`effect-${drug}`);
+                    vignette.style.display = 'none';
+                }, 10000);
+            } else {
+                effectWrapper.classList.add(`effect-${drug}`);
+                setTimeout(() => {
+                    effectWrapper.classList.remove(`effect-${drug}`);
+                }, 10000);
+            }
         }
 
         // Reset game
-        resetBtn.addEventListener('click', () => {
+        document.getElementById('reset-btn').addEventListener('click', () => {
             highness = 0;
             tolerance = 0;
             timeElapsed = 0;
             gameOver = false;
-            selectedDrug = null;
-            takeBtn.disabled = true;
             clearInterval(intervalId);
             intervalId = null;
             clearTimeout(effectTimeout);
-            body.classList.remove('invert', 'grayscale', 'sepia', 'blur', 'pixelate', 'rotate', 'glitch', 'color-shift', 'wave', 'particles');
+            effectWrapper.classList.remove('effect-acid', 'effect-weed', 'effect-cocaine', 'effect-heroin', 'effect-shrooms', 'effect-meth', 'effect-ketamine', 'effect-pcp', 'effect-dmt');
+            if (ecstasyInterval) {
+                clearInterval(ecstasyInterval);
+                ecstasyInterval = null;
+                effectWrapper.style.backgroundColor = '';
+                effectWrapper.style.transform = '';
+            }
+            vignette.style.display = 'none';
             updateHighness();
             timeDisplay.textContent = 'Time Elapsed: 0s';
             message.textContent = '';
+            body.style.backgroundColor = '#f0f0f0';
+            document.querySelectorAll('#drug-buttons button').forEach(btn => btn.disabled = false);
         });
 
         // End game
@@ -265,7 +355,7 @@
             clearInterval(intervalId);
             intervalId = null;
             message.textContent = endMessage;
-            takeBtn.disabled = true;
+            document.querySelectorAll('#drug-buttons button').forEach(btn => btn.disabled = true);
         }
 
         // Initialize game
