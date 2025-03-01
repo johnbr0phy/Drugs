@@ -11,7 +11,7 @@
             background-color: #f0f0f0;
             margin: 20px;
             transition: background-color 0.5s;
-            overflow: hidden; /* Keep the chaos contained */
+            overflow: hidden;
         }
         h1 {
             font-size: 24px;
@@ -37,7 +37,7 @@
         }
         #highness-fill {
             height: 100%;
-            width: 50%;
+            width: 50%; /* Starts at 0 (-100 to 100 maps to 0-100%) */
             background-color: #00ff00;
             transition: width 0.5s, background-color 0.5s;
         }
@@ -71,20 +71,13 @@
             font-size: 16px;
             margin-top: 10px;
         }
-        #vignette {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: radial-gradient(circle, transparent 10%, black 100%);
-            display: none;
+        #active-effects {
+            font-size: 14px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="vignette"></div>
     <div id="effect-wrapper">
         <div id="game-container">
             <h1>Ultra-Crazy Interactive Drug Simulation Game</h1>
@@ -107,6 +100,7 @@
             </div>
             <button id="reset-btn">Reset Game</button>
             <div id="time">Time Elapsed: 0s</div>
+            <div id="active-effects">Active Effects: None</div>
         </div>
     </div>
 
@@ -117,12 +111,10 @@
         let timeElapsed = 0;
         let gameOver = false;
         let intervalId = null;
-        let effectActive = false;
-        let effectStartTime = 0;
-        let currentDrug = null;
-        let effectTimeout = null;
+        let activeEffects = [];
+        const maxEffects = 3;
 
-        // Mouse tracking
+        // Mouse tracking for interactive effects
         let lastMouseX = 0;
         let lastMouseY = 0;
         let mouseX = 0;
@@ -145,8 +137,8 @@
         const status = document.getElementById('status');
         const message = document.getElementById('message');
         const timeDisplay = document.getElementById('time');
+        const activeEffectsDisplay = document.getElementById('active-effects');
         const body = document.body;
-        const vignette = document.getElementById('vignette');
 
         // Start the game timer
         function startGame() {
@@ -158,19 +150,13 @@
         // Update game state
         function updateGame() {
             if (gameOver) return;
-
-            const decreaseRate = 2 + 0.2 * tolerance;
+            const decreaseRate = 1 + 0.1 * tolerance; // Slower decay for higher tolerance
             highness -= decreaseRate;
             updateHighness();
-
             timeElapsed++;
             timeDisplay.textContent = `Time Elapsed: ${timeElapsed}s`;
-
-            if (highness > 100) {
-                endGame('Overdose: Game Over');
-            } else if (highness < -100) {
-                endGame('Severe Withdrawal: Game Over');
-            }
+            if (highness > 100) endGame('Overdose: Game Over');
+            else if (highness < -100) endGame('Severe Withdrawal: Game Over');
         }
 
         // Update highness display and background color
@@ -178,158 +164,121 @@
             const percentage = ((highness + 100) / 200) * 100;
             highnessFill.style.width = `${percentage}%`;
             status.textContent = `Highness: ${Math.round(highness)}`;
-
-            if (highness >= 80) {
-                body.style.backgroundColor = '#e0ffe0';
-            } else if (highness >= 50) {
-                body.style.backgroundColor = '#fff5e0';
-            } else if (highness >= 0) {
-                body.style.backgroundColor = '#f0f0f0';
-            } else {
-                body.style.backgroundColor = '#ffe0e0';
-            }
+            if (highness >= 80) body.style.backgroundColor = '#e0ffe0';
+            else if (highness >= 50) body.style.backgroundColor = '#fff5e0';
+            else if (highness >= 0) body.style.backgroundColor = '#f0f0f0';
+            else body.style.backgroundColor = '#ffe0e0';
         }
 
         // Take drug action
         function takeDrug(drug) {
             if (gameOver) return;
             startGame();
-
             const baseIncrease = 80 + (Math.random() * 20 - 10);
             const increase = baseIncrease / (1 + tolerance / 10);
             highness += increase;
             tolerance += 1;
             updateHighness();
 
-            applyEffect(drug);
+            if (activeEffects.length < maxEffects) {
+                const effect = { name: drug, startTime: Date.now(), duration: 10000 };
+                activeEffects.push(effect);
+                applyEffect(effect);
+                updateActiveEffectsDisplay();
+            } else {
+                message.textContent = 'Max effects reached! Wait for one to wear off.';
+            }
         }
 
         // Apply ultra-crazy interactive visual effect
-        function applyEffect(drug) {
-            if (effectTimeout) {
-                clearTimeout(effectTimeout);
-            }
-            currentDrug = drug;
-            effectStartTime = Date.now();
-            if (!effectActive) {
-                effectActive = true;
-                requestAnimationFrame(updateEffect);
-            }
-            effectTimeout = setTimeout(() => {
-                effectActive = false;
-                effectWrapper.style = '';
-                vignette.style.display = 'none';
-            }, 10000);
+        function applyEffect(effect) {
+            const drug = effect.name;
+            const startTime = effect.startTime;
+            const duration = effect.duration;
+
+            effect.intervalId = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                if (elapsed >= duration) {
+                    clearInterval(effect.intervalId);
+                    activeEffects = activeEffects.filter(e => e !== effect);
+                    updateActiveEffectsDisplay();
+                    return;
+                }
+                const mouseFactor = Math.min(mouseSpeed / 10, 10);
+
+                switch (drug) {
+                    case 'acid':
+                        const hueAcid = (elapsed * 0.72 * (1 + mouseFactor)) % 360;
+                        effectWrapper.style.transform = `scale(${1 + 0.5 * Math.sin(elapsed * 0.001 * Math.PI * (2 + mouseFactor))}) rotate(${mouseFactor * 10}deg)`;
+                        effectWrapper.style.filter = `hue-rotate(${hueAcid}deg) saturate(${300 + mouseFactor * 200}%)`;
+                        break;
+                    case 'weed':
+                        effectWrapper.style.filter = `blur(${20 + mouseFactor * 10}px)`;
+                        break;
+                    case 'cocaine':
+                        effectWrapper.style.transform = `translate(${Math.sin(elapsed * 0.2 * (1 + mouseFactor)) * (10 + mouseFactor * 5)}px, ${Math.cos(elapsed * 0.2 * (1 + mouseFactor)) * (10 + mouseFactor * 5)}px)`;
+                        break;
+                    case 'heroin':
+                        effectWrapper.style.transform = `translate(${(mouseX / window.innerWidth - 0.5) * 100}px, ${(mouseY / window.innerHeight - 0.5) * 100}px)`;
+                        effectWrapper.style.filter = `blur(15px)`;
+                        break;
+                    case 'ecstasy':
+                        effectWrapper.style.backgroundColor = `hsl(${(elapsed * 0.72 * (1 + mouseFactor * 20)) % 360}, 100%, 50%)`;
+                        break;
+                    case 'shrooms':
+                        effectWrapper.style.filter = `invert(${Math.sin(elapsed * 0.004 * Math.PI * (1 + mouseFactor)) * 75 + 75}%)`;
+                        break;
+                    case 'meth':
+                        effectWrapper.style.transform = `translate(${Math.sin(elapsed * 0.1 * (1 + mouseFactor)) * (20 + mouseFactor * 10)}px, 0)`;
+                        break;
+                    case 'ketamine':
+                        effectWrapper.style.transform = `scale(${0.5 - 0.2 * (mouseY / window.innerHeight)})`;
+                        break;
+                    case 'pcp':
+                        effectWrapper.style.transform = `translate(${Math.sin(elapsed * 0.04 * (1 + mouseFactor)) * (50 + mouseFactor * 20)}px, 0)`;
+                        break;
+                    case 'dmt':
+                        effectWrapper.style.filter = `hue-rotate(${(elapsed * 1.44 * (1 + mouseFactor * 10)) % 360}deg)`;
+                        break;
+                }
+            }, 16);
         }
 
-        // Update effect with mouse interaction
-        function updateEffect() {
-            if (!effectActive) return;
-            const elapsed = (Date.now() - effectStartTime) / 1000;
-            const mouseFactor = Math.min(mouseSpeed / 10, 10); // Cap mouse factor for sanity
-
-            switch (currentDrug) {
-                case 'acid':
-                    const hueAcid = (elapsed * 720 * (1 + mouseFactor)) % 360; // Double speed
-                    const scaleAcid = 1 + 0.5 * Math.sin(elapsed * Math.PI * (2 + mouseFactor)); // Larger scaling
-                    const contrastAcid = 100 + 100 * Math.sin(elapsed * 4 * Math.PI * (1 + mouseFactor));
-                    const brightnessAcid = 100 + 50 * Math.cos(elapsed * 3 * (1 + mouseFactor));
-                    effectWrapper.style.transform = `scale(${scaleAcid}) rotate(${mouseFactor * 10}deg)`;
-                    effectWrapper.style.filter = `hue-rotate(${hueAcid}deg) saturate(${300 + mouseFactor * 200}%) contrast(${contrastAcid}%) brightness(${brightnessAcid}%)`;
-                    break;
-                case 'weed':
-                    const blurWeed = 20 + mouseFactor * 10; // Up to 120px blur
-                    const greenShift = 90 + mouseFactor * 20; // Greener with movement
-                    effectWrapper.style.filter = `blur(${blurWeed}px) hue-rotate(${greenShift}deg) saturate(${200 + mouseFactor * 300}%) opacity(${0.9 - mouseFactor * 0.05})`;
-                    effectWrapper.style.transform = `scale(${1 + mouseFactor * 0.1})`;
-                    break;
-                case 'cocaine':
-                    const vibrateX = Math.sin(elapsed * 200 * (1 + mouseFactor)) * (10 + mouseFactor * 5);
-                    const vibrateY = Math.cos(elapsed * 200 * (1 + mouseFactor)) * (10 + mouseFactor * 5);
-                    const flashChance = 0.2 * (1 + mouseFactor);
-                    const flash = Math.random() < flashChance ? `invert(${100 + mouseFactor * 20}%)` : '';
-                    effectWrapper.style.transform = `translate(${vibrateX}px, ${vibrateY}px) skew(${mouseFactor * 5}deg)`;
-                    effectWrapper.style.filter = `${flash} brightness(${150 + mouseFactor * 50}%)`;
-                    break;
-                case 'heroin':
-                    const driftX = (mouseX / window.innerWidth - 0.5) * 100; // Wider drift
-                    const driftY = (mouseY / window.innerHeight - 0.5) * 100;
-                    const zoomHeroin = 1 + 0.2 * Math.sin(elapsed * 1 + mouseFactor);
-                    effectWrapper.style.transform = `translate(${driftX}px, ${driftY}px) scale(${zoomHeroin}) rotate(${mouseFactor * 15}deg)`;
-                    effectWrapper.style.filter = `blur(${15 + mouseFactor * 5}px) contrast(${40 - mouseFactor * 5}%) opacity(${0.6 - mouseFactor * 0.05})`;
-                    break;
-                case 'ecstasy':
-                    const hueEcstasy = (elapsed * 720 * (1 + mouseFactor * 20)) % 360; // Insane color speed
-                    const scaleEcstasy = 1 + 0.3 * Math.sin(elapsed * 20 * (1 + mouseFactor));
-                    const rotateEcstasy = Math.sin(elapsed * 10 * (1 + mouseFactor)) * 30;
-                    effectWrapper.style.backgroundColor = `hsl(${hueEcstasy}, 100%, ${50 + mouseFactor * 20}%)`;
-                    effectWrapper.style.transform = `scale(${scaleEcstasy}) rotate(${rotateEcstasy}deg) skew(${mouseFactor * 10}deg)`;
-                    effectWrapper.style.filter = `saturate(${400 + mouseFactor * 200}%) brightness(${100 + mouseFactor * 100}%)`;
-                    break;
-                case 'shrooms':
-                    const invertShrooms = Math.sin(elapsed * 4 * Math.PI * (1 + mouseFactor)) * 75 + 75; // Wilder inversion
-                    const hueShrooms = (elapsed * 720 * (1 + mouseFactor * 2)) % 360;
-                    const brightnessShrooms = 100 + 200 * Math.sin(elapsed * 2 * Math.PI * (1 + mouseFactor));
-                    const saturateShrooms = 200 + 400 * mouseFactor;
-                    effectWrapper.style.transform = `scale(${1 + mouseFactor * 0.2}) rotate(${mouseFactor * 20}deg)`;
-                    effectWrapper.style.filter = `invert(${invertShrooms}%) hue-rotate(${hueShrooms}deg) brightness(${brightnessShrooms}%) saturate(${saturateShrooms}%)`;
-                    break;
-                case 'meth':
-                    const glitchX = Math.sin(elapsed * 100 * (1 + mouseFactor)) * (20 + mouseFactor * 10);
-                    const glitchY = Math.cos(elapsed * 100 * (1 + mouseFactor)) * (20 + mouseFactor * 10);
-                    const skewMeth = Math.sin(elapsed * 20 * (1 + mouseFactor)) * 40;
-                    const hueMeth = (elapsed * 720 * (1 + mouseFactor * 5)) % 360;
-                    effectWrapper.style.transform = `translate(${glitchX}px, ${glitchY}px) skew(${skewMeth}deg) scale(${1 + mouseFactor * 0.15})`;
-                    effectWrapper.style.filter = `hue-rotate(${hueMeth}deg) contrast(${150 + mouseFactor * 50}%)`;
-                    break;
-                case 'ketamine':
-                    const scaleKet = 0.5 - 0.2 * (mouseY / window.innerHeight); // More extreme scaling
-                    const rotateKet = (mouseX / window.innerWidth - 0.5) * 40;
-                    const blurKet = 10 + mouseFactor * 10;
-                    effectWrapper.style.transform = `scale(${scaleKet}) rotate(${rotateKet}deg) translate(${(mouseX / window.innerWidth - 0.5) * 50}px, ${(mouseY / window.innerHeight - 0.5) * 50}px)`;
-                    effectWrapper.style.filter = `blur(${blurKet}px)`;
-                    vignette.style.display = 'block';
-                    vignette.style.opacity = 0.9 + 0.3 * Math.sin(elapsed * 20 * (1 + mouseFactor));
-                    break;
-                case 'pcp':
-                    const shakeX = Math.sin(elapsed * 40 * (1 + mouseFactor)) * (50 + mouseFactor * 20); // Huge shakes
-                    const shakeY = Math.cos(elapsed * 40 * (1 + mouseFactor)) * (50 + mouseFactor * 20);
-                    const rotatePcp = Math.sin(elapsed * 10 * (1 + mouseFactor)) * 45;
-                    effectWrapper.style.transform = `translate(${shakeX}px, ${shakeY}px) rotate(${rotatePcp}deg) skew(${mouseFactor * 15}deg)`;
-                    effectWrapper.style.filter = `contrast(${200 + mouseFactor * 100}%) brightness(${100 + mouseFactor * 50}%)`;
-                    break;
-                case 'dmt':
-                    const hueDmt = (elapsed * 1440 * (1 + mouseFactor * 10)) % 360; // Hyper-fast hue
-                    const scaleDmt = 1 + 0.6 * Math.sin(elapsed * 10 * (1 + mouseFactor)); // Massive scaling
-                    const twistDmt = Math.sin(elapsed * 4 * Math.PI * (1 + mouseFactor)) * 60;
-                    const brightnessDmt = 300 + 200 * mouseFactor;
-                    const contrastDmt = 300 + 200 * mouseFactor;
-                    effectWrapper.style.transform = `scale(${scaleDmt}) rotate(${twistDmt}deg) translate(${(mouseX / window.innerWidth - 0.5) * 50}px, ${(mouseY / window.innerHeight - 0.5) * 50}px)`;
-                    effectWrapper.style.filter = `hue-rotate(${hueDmt}deg) brightness(${brightnessDmt}%) contrast(${contrastDmt}%) saturate(${600 + mouseFactor * 400}%)`;
-                    break;
-            }
-            requestAnimationFrame(updateEffect);
+        // Update active effects display
+        function updateActiveEffectsDisplay() {
+            activeEffectsDisplay.textContent = activeEffects.length === 0 ? 'Active Effects: None' : `Active Effects: ${activeEffects.map(e => `${e.name} (${Math.ceil((e.duration - (Date.now() - e.startTime)) / 1000)}s)`).join(', ')}`;
         }
 
-        // Reset game
+        // Reset game functionality
         document.getElementById('reset-btn').addEventListener('click', () => {
-            highness = 0;
-            tolerance = 0;
-            timeElapsed = 0;
-            gameOver = false;
-            clearInterval(intervalId);
-            intervalId = null;
-            if (effectTimeout) {
-                clearTimeout(effectTimeout);
+            // Stop all active effect intervals
+            activeEffects.forEach(effect => {
+                if (effect.intervalId) {
+                    clearInterval(effect.intervalId);
+                }
+            });
+
+            // Reset game state
+            activeEffects = []; // Clear all effects
+            highness = 0; // Reset highness to initial value
+            tolerance = 0; // Reset tolerance
+            timeElapsed = 0; // Reset time
+            gameOver = false; // Allow gameplay to resume
+
+            // Clear game timer
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
             }
-            effectActive = false;
-            effectWrapper.style = '';
-            vignette.style.display = 'none';
-            updateHighness();
-            timeDisplay.textContent = 'Time Elapsed: 0s';
-            message.textContent = '';
-            body.style.backgroundColor = '#f0f0f0';
-            document.querySelectorAll('#drug-buttons button').forEach(btn => btn.disabled = false);
+
+            // Reset visual effects and UI
+            effectWrapper.style = ''; // Remove all styles from effect wrapper
+            updateHighness(); // Update highness bar and status
+            timeDisplay.textContent = 'Time Elapsed: 0s'; // Reset time display
+            message.textContent = ''; // Clear any messages
+            activeEffectsDisplay.textContent = 'Active Effects: None'; // Clear effects display
+            body.style.backgroundColor = '#f0f0f0'; // Reset background
+            document.querySelectorAll('#drug-buttons button').forEach(btn => btn.disabled = false); // Re-enable buttons
         });
 
         // End game
